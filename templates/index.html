@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>QuickURL</title>
+    <link rel="stylesheet" href="../static/styles.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet" />
+  </head>
+  <body>
+    <div class="page">
+      <header class="hero">
+        <div>
+          <p class="kicker">QuickURL</p>
+          <h1>Turn long links into short, sharp codes.</h1>
+          <p class="subhead">Generate a short URL or jump to a destination using a code.</p>
+        </div>
+        <div class="orb" aria-hidden="true"></div>
+      </header>
+
+      <main class="cards">
+        <section class="card">
+          <h2>Make a short link</h2>
+          <p class="muted">Paste a long URL and get a compact code.</p>
+          <label class="field">
+            <span>Long URL</span>
+            <input id="longUrl" type="url" placeholder="https://example.com/some/long/path" autocomplete="off" />
+          </label>
+          <button id="shortenBtn" class="primary">Generate</button>
+          <div class="result" id="shortResult" aria-live="polite">
+            <span class="label">Short URL</span>
+            <div class="value" id="shortUrlValue">�</div>
+          </div>
+        </section>
+
+        <section class="card">
+          <h2>Go to a link</h2>
+          <p class="muted">Enter a code, we will take you there.</p>
+          <label class="field">
+            <span>Short code</span>
+            <input id="codeInput" type="text" placeholder="e.g. g8" autocomplete="off" />
+          </label>
+          <button id="goBtn" class="secondary">Visit</button>
+          <div class="result" id="resolveResult" aria-live="polite">
+            <span class="label">Status</span>
+            <div class="value" id="resolveValue">�</div>
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <script src="../static/app.js"></script>
+  </body>
+</html>
