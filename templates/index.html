@@ -4,7 +4,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>QuickURL</title>
-    <link rel="stylesheet" href="../static/styles.css" />
+    <link rel="stylesheet" href="/static/styles.css" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet" />
@@ -30,8 +30,11 @@
           </label>
           <button id="shortenBtn" class="primary">Generate</button>
           <div class="result" id="shortResult" aria-live="polite">
-            <span class="label">Short URL</span>
-            <div class="value" id="shortUrlValue">�</div>
+            <div class="result-header">
+              <span class="label">Short URL</span>
+              <button id="copyBtn" class="ghost" type="button">Copy</button>
+            </div>
+            <div class="value" id="shortUrlValue">Paste a link above</div>
           </div>
         </section>
 
@@ -45,12 +48,12 @@
           <button id="goBtn" class="secondary">Visit</button>
           <div class="result" id="resolveResult" aria-live="polite">
             <span class="label">Status</span>
-            <div class="value" id="resolveValue">�</div>
+            <div class="value" id="resolveValue">Paste a code above</div>
           </div>
         </section>
       </main>
     </div>
 
-    <script src="../static/app.js"></script>
+    <script src="/static/app.js"></script>
   </body>
 </html>

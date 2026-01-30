@@ -40,6 +40,20 @@ def _base62_encode(num: int) -> str:
     return "".join(reversed(chars))
 
 
+def _normalize_url(raw: str) -> str:
+    raw = raw.strip()
+    if not raw:
+        return raw
+    parsed = urlparse(raw)
+    if parsed.scheme:
+        return raw
+    parsed_netloc = urlparse(f"//{raw}")
+    host = parsed_netloc.hostname or ""
+    if "localhost" in host or "127.0.0.1" in host:
+        return f"http://{raw}"
+    return f"https://{raw}"
+
+
 def _get_db_connection():
     return mysql.connector.connect(
         host=os.getenv("MYSQL_HOST", "localhost"),
@@ -122,11 +136,9 @@ def shorten():
     url = payload.get("url")
     if not url:
         return jsonify({"error": "Missing 'url' in JSON body"}), 400
-    url = url.strip()
+    url = _normalize_url(url)
     if not url:
         return jsonify({"error": "Missing 'url' in JSON body"}), 400
-    if "://" not in url:
-        url = f"https://{url}"
 
     conn = _get_db_connection()
     try:
@@ -155,11 +167,9 @@ def redirect_code(code: str):
         conn.close()
 
     if not row:
-        return jsonify({"error": "Short code not found"}), 404
+        return render_template("404.html", code=code), 404
 
-    target = row[0].strip()
-    if not urlparse(target).scheme:
-        target = f"https://{target}"
+    target = _normalize_url(row[0])
     return redirect(target, code=302)
 
 
@@ -176,9 +186,7 @@ def resolve_code(code: str):
     if not row:
         return jsonify({"error": "Short code not found"}), 404
 
-    target = row[0].strip()
-    if not urlparse(target).scheme:
-        target = f"https://{target}"
+    target = _normalize_url(row[0])
     return jsonify({"url": target})
 
 

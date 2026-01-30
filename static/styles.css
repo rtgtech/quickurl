@@ -151,6 +151,13 @@ button:active {
   font-size: 13px;
 }
 
+.result-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
 .result .label {
   text-transform: uppercase;
   font-size: 11px;
@@ -161,6 +168,56 @@ button:active {
 .result .value {
   font-size: 14px;
   word-break: break-all;
+}
+
+.ghost {
+  background: transparent;
+  border: 1px solid #e4d7cc;
+  color: var(--ink);
+  padding: 6px 12px;
+  border-radius: 999px;
+  font-size: 12px;
+  letter-spacing: 0.5px;
+  box-shadow: none;
+}
+
+.ghost:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.not-found {
+  max-width: 640px;
+  margin: 0 auto;
+}
+
+.not-found .card {
+  text-align: center;
+}
+
+.code-pill {
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: rgba(240, 93, 35, 0.12);
+  color: var(--ink);
+  font-weight: 700;
+}
+
+.not-found-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  justify-content: center;
+}
+
+.button-link {
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 5px 25px;
+  border-radius: 20px;
 }
 
 @keyframes float {

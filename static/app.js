@@ -1,5 +1,6 @@
 const shortenBtn = document.getElementById("shortenBtn");
 const goBtn = document.getElementById("goBtn");
+const copyBtn = document.getElementById("copyBtn");
 
 const longUrlInput = document.getElementById("longUrl");
 const shortUrlValue = document.getElementById("shortUrlValue");
@@ -63,5 +64,27 @@ goBtn.addEventListener("click", async () => {
     window.location.href = `/${encodeURIComponent(code)}`;
   } catch (err) {
     setResult(resolveValue, "Network error", false);
+  }
+});
+
+copyBtn.addEventListener("click", async () => {
+  const text = shortUrlValue.textContent.trim();
+  if (!text || text === "Paste a link above") {
+    copyBtn.textContent = "No link";
+    setTimeout(() => {
+      copyBtn.textContent = "Copy";
+    }, 1200);
+    return;
+  }
+
+  try {
+    await navigator.clipboard.writeText(text);
+    copyBtn.textContent = "Copied";
+  } catch (err) {
+    copyBtn.textContent = "Failed";
+  } finally {
+    setTimeout(() => {
+      copyBtn.textContent = "Copy";
+    }, 1500);
   }
 });

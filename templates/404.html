@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Not Found · QuickURL</title>
+    <link rel="stylesheet" href="/static/styles.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet" />
+  </head>
+  <body>
+    <div class="page">
+      <header class="hero">
+        <div>
+          <p class="kicker">QuickURL</p>
+          <h1>We could not find that short code.</h1>
+          <p class="subhead">Double-check the code or create a new short link.</p>
+        </div>
+        <div class="orb" aria-hidden="true"></div>
+      </header>
+
+      <main class="not-found">
+        <section class="card">
+          <h2>Code not found</h2>
+          <p class="muted">
+            The code <span class="code-pill">{{ code }}</span> does not exist in the database.
+          </p>
+          <div class="not-found-actions">
+            <a class="primary button-link" href="/">Create a short link</a>
+          </div>
+        </section>
+      </main>
+    </div>
+  </body>
+</html>
