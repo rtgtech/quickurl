@@ -26,7 +26,14 @@
           <p class="muted">Paste a long URL and get a compact code.</p>
           <label class="field">
             <span>Long URL</span>
-            <input id="longUrl" type="url" placeholder="https://example.com/some/long/path" autocomplete="off" />
+            <input
+              id="longUrl"
+              type="url"
+              placeholder="https://example.com/some/long/path"
+              autocomplete="off"
+              pattern="https://.+\\.[A-Za-z]{2,}.*"
+              title="Enter a valid URL like https://example.com"
+            />
           </label>
           <button id="shortenBtn" class="primary">Generate</button>
           <div class="result" id="shortResult" aria-live="polite">

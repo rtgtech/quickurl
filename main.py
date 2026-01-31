@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import os
+import re
 from urllib.parse import urlparse
 from flask import Flask, jsonify, redirect, render_template, request
 import mysql.connector
@@ -28,6 +29,11 @@ BASE = len(ALPHABET)
 
 _COUNTER_ROW_ID = 1
 _COUNTER_START = int(os.getenv("SHORTENER_COUNTER_START", "1000"))
+
+_HTTPS_URL_PATTERN = re.compile(
+    r"^https://[^/\s]+(\.[A-Za-z]{2,})(?:[/?#]|$)",
+    re.IGNORECASE,
+)
 
 
 def _base62_encode(num: int) -> str:
@@ -169,8 +175,12 @@ def redirect_code(code: str):
     if not row:
         return render_template("404.html", code=code), 404
 
-    target = _normalize_url(row[0])
-    return redirect(target, code=302)
+    raw_url = (row[0] or "").strip()
+    if not _HTTPS_URL_PATTERN.search(raw_url):
+        return jsonify({"error": "Invalid URL for this short code"}), 400
+
+    target = _normalize_url(raw_url)
+    return redirect(target, code=301)
 
 
 @app.route("/resolve/<code>", methods=["GET"])

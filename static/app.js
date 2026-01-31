@@ -8,6 +8,9 @@ const shortUrlValue = document.getElementById("shortUrlValue");
 const codeInput = document.getElementById("codeInput");
 const resolveValue = document.getElementById("resolveValue");
 
+const httpsUrlPattern = /^https:\/\/.+\.[A-Za-z]{2,}(?:[/?#].*)?$/;
+let isShortUrlReady = false;
+
 const setResult = (el, message, ok = true) => {
   el.textContent = message;
   el.style.color = ok ? "#141213" : "#b42318";
@@ -17,10 +20,21 @@ shortenBtn.addEventListener("click", async () => {
   const url = longUrlInput.value.trim();
   if (!url) {
     setResult(shortUrlValue, "Please enter a URL.", false);
+    isShortUrlReady = false;
+    return;
+  }
+  if (!httpsUrlPattern.test(url)) {
+    setResult(
+      shortUrlValue,
+      "Enter a valid URL like https://example.com",
+      false
+    );
+    isShortUrlReady = false;
     return;
   }
 
   setResult(shortUrlValue, "Working...");
+  isShortUrlReady = false;
 
   try {
     const res = await fetch("/shorten", {
@@ -32,13 +46,16 @@ shortenBtn.addEventListener("click", async () => {
     if (!res.ok) {
       const data = await res.json().catch(() => ({}));
       setResult(shortUrlValue, data.error || "Failed to shorten", false);
+      isShortUrlReady = false;
       return;
     }
 
     const data = await res.json();
     setResult(shortUrlValue, data.short_url);
+    isShortUrlReady = true;
   } catch (err) {
     setResult(shortUrlValue, "Network error", false);
+    isShortUrlReady = false;
   }
 });
 
@@ -69,7 +86,7 @@ goBtn.addEventListener("click", async () => {
 
 copyBtn.addEventListener("click", async () => {
   const text = shortUrlValue.textContent.trim();
-  if (!text || text === "Paste a link above") {
+  if (!text || !isShortUrlReady) {
     copyBtn.textContent = "No link";
     setTimeout(() => {
       copyBtn.textContent = "Copy";
