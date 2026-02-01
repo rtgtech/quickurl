@@ -1,6 +1,7 @@
 const shortenBtn = document.getElementById("shortenBtn");
 const goBtn = document.getElementById("goBtn");
 const copyBtn = document.getElementById("copyBtn");
+const logoLink = document.querySelector(".logo");
 
 const longUrlInput = document.getElementById("longUrl");
 const shortUrlValue = document.getElementById("shortUrlValue");
@@ -105,3 +106,11 @@ copyBtn.addEventListener("click", async () => {
     }, 1500);
   }
 });
+
+if (logoLink) {
+  logoLink.addEventListener("click", (event) => {
+    if (window.location.pathname === "/") {
+      event.preventDefault();
+    }
+  });
+}

@@ -1,0 +1,179 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>QuickURL Docs</title>
+    <link rel="stylesheet" href="/static/styles.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet" />
+  </head>
+  <body>
+    <header class="topbar">
+      <div class="topbar-inner">
+        <a class="logo" href="/">QuickURL <span class="logo-docs">Docs</span></a>
+        <button class="nav-button primary topbar-cta" type="button">Sign Up</button>
+      </div>
+    </header>
+
+    <div class="page">
+      <div class="hero">
+        <div>
+          <p class="kicker">Docs</p>
+          <h1>QuickURL API basics</h1>
+          <p class="subhead">Everything you need to shorten, resolve, and redirect in a few requests.</p>
+        </div>
+        <div class="orb" aria-hidden="true"></div>
+      </div>
+
+      <a class="doc-link" href="/">visit main page →</a>
+
+      <section class="doc-section">
+        <div class="doc-header">
+          <p class="kicker">Endpoint</p>
+          <h2>https://quickurl/shorten/</h2>
+        </div>
+        <div class="doc-grid">
+          <div class="doc-card doc-stack">
+            <div>
+              <h3>Overview</h3>
+              <p class="muted">Create a short code for a long URL. Send JSON with the URL and get back a short code and short URL.</p>
+              <div class="doc-list">
+                <div><span class="label">Parameters</span> <span class="value"><span class="doc-inline-code">url</span> (string, required)</span></div>
+                <div><span class="label">Response</span> <span class="value"><span class="doc-inline-code">short_code</span>, <span class="doc-inline-code">short_url</span></span></div>
+              </div>
+            </div>
+            <div>
+              <h3>Endpoint URL</h3>
+              <div class="result">
+                <span class="label">POST</span>
+                <div class="value">https://quickurl/shorten/</div>
+              </div>
+            </div>
+            <div class="doc-code">
+              <div class="code-panel">
+                <div class="tab-bar" data-tabs="shorten">
+                  <div class="tabs">
+                    <button class="tab active" data-tab="javascript" type="button">JavaScript</button>
+                    <button class="tab" data-tab="python" type="button">Python</button>
+                    <button class="tab" data-tab="curl" type="button">cURL</button>
+                  </div>
+                  <button class="copy-code" type="button" data-copy="shorten">Copy</button>
+                </div>
+                <pre class="code-block" data-panel="shorten" data-content="javascript"><code>fetch("/shorten", {
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
+  body: JSON.stringify({ url: "https://example.com" })
+})
+  .then((res) => res.json())
+  .then(console.log);</code></pre>
+                <pre class="code-block hidden" data-panel="shorten" data-content="python"><code>import requests
+
+response = requests.post(
+    "http://localhost:5000/shorten",
+    json={"url": "https://example.com"},
+)
+print(response.json())</code></pre>
+                <pre class="code-block hidden" data-panel="shorten" data-content="curl"><code>curl -X POST http://localhost:5000/shorten \
+  -H "Content-Type: application/json" \
+  -d '{"url":"https://example.com"}'</code></pre>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="doc-section">
+        <div class="doc-header">
+          <p class="kicker">Endpoint</p>
+          <h2>https://quickurl/resolve/&lt;code&gt;</h2>
+        </div>
+        <div class="doc-grid">
+          <div class="doc-card doc-stack">
+            <div>
+              <h3>Overview</h3>
+              <p class="muted">Resolve a short code to its destination URL without redirecting.</p>
+              <div class="doc-list">
+                <div><span class="label">Parameters</span> <span class="value"><span class="doc-inline-code">code</span> (string, required)</span></div>
+                <div><span class="label">Response</span> <span class="value"><span class="doc-inline-code">url</span></span></div>
+              </div>
+            </div>
+            <div>
+              <h3>Endpoint URL</h3>
+              <div class="result">
+                <span class="label">GET</span>
+                <div class="value">https://quickurl/resolve/&lt;code&gt;</div>
+              </div>
+            </div>
+            <div class="doc-code">
+              <div class="code-panel">
+                <div class="tab-bar" data-tabs="resolve">
+                  <div class="tabs">
+                    <button class="tab active" data-tab="javascript" type="button">JavaScript</button>
+                    <button class="tab" data-tab="python" type="button">Python</button>
+                    <button class="tab" data-tab="curl" type="button">cURL</button>
+                  </div>
+                  <button class="copy-code" type="button" data-copy="resolve">Copy</button>
+                </div>
+                <pre class="code-block" data-panel="resolve" data-content="javascript"><code>fetch("/resolve/g8")
+  .then((res) => res.json())
+  .then(console.log);</code></pre>
+                <pre class="code-block hidden" data-panel="resolve" data-content="python"><code>import requests
+
+response = requests.get("http://localhost:5000/resolve/g8")
+print(response.json())</code></pre>
+                <pre class="code-block hidden" data-panel="resolve" data-content="curl"><code>curl http://localhost:5000/resolve/g8</code></pre>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <script>
+      const tabGroups = document.querySelectorAll("[data-tabs]");
+      tabGroups.forEach((group) => {
+        group.addEventListener("click", (event) => {
+          const button = event.target.closest(".tab");
+          if (!button) return;
+          const panelName = group.dataset.tabs;
+          const tabValue = button.dataset.tab;
+          group.querySelectorAll(".tab").forEach((tab) => {
+            tab.classList.toggle("active", tab === button);
+          });
+          document
+            .querySelectorAll(`[data-panel="${panelName}"]`)
+            .forEach((panel) => {
+              panel.classList.toggle(
+                "hidden",
+                panel.dataset.content !== tabValue
+              );
+            });
+        });
+      });
+
+      document.querySelectorAll("[data-copy]").forEach((button) => {
+        button.addEventListener("click", async () => {
+          const panelName = button.dataset.copy;
+          const activePanel = document.querySelector(
+            `[data-panel="${panelName}"]:not(.hidden)`
+          );
+          if (!activePanel) return;
+          const code = activePanel.textContent.trim();
+          const original = button.textContent;
+          try {
+            await navigator.clipboard.writeText(code);
+            button.textContent = "Copied";
+          } catch (err) {
+            button.textContent = "Failed";
+          } finally {
+            setTimeout(() => {
+              button.textContent = original;
+            }, 1200);
+          }
+        });
+      });
+    </script>
+  </body>
+</html>
