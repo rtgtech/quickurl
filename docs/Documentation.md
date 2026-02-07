@@ -10,7 +10,7 @@ This project is a Flask-based URL shortener that generates short codes from a co
 
 ## Data Model
 Table: `quickurl`
-- `short_code` (TEXT, required)
+- `short_code` (VARCHAR(64), required, primary key, case-sensitive)
 - `url` (TEXT, required)
 
 Table: `counter_state`
@@ -34,9 +34,12 @@ If a user submits a URL without a scheme (e.g. `youtube.com`), the backend norma
 ## API Endpoints
 ### POST `/shorten`
 Creates a short code.
-- **Input**: JSON body `{ "url": "https://example.com" }`
+- **Input**: JSON body `{ "url": "https://example.com", "custom_code": "myCode123" }`
+  - `url` (string, required)
+  - `custom_code` (string, optional): 2-64 characters, letters and digits only. Some codes are reserved (e.g. `docs`, `shorten`, `resolve`, `static`).
 - **Output**: `{ "short_code": "g8", "short_url": "http://localhost:5000/g8" }`
 - **Errors**: `400` if `url` is missing or empty.
+  - `409` if `custom_code` is already taken.
 
 ### GET `/{code}`
 Redirects to the stored long URL.
@@ -79,5 +82,4 @@ Environment variables:
 - Use restricted CORS origins in production.
 
 ## Limitations and Future Improvements
-- Add uniqueness constraints on `short_code`.
 - Add analytics and expiry for links.

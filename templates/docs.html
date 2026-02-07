@@ -13,7 +13,20 @@
     <header class="topbar">
       <div class="topbar-inner">
         <a class="logo" href="/">QuickURL <span class="logo-docs">Docs</span></a>
-        <button class="nav-button primary topbar-cta" type="button">Sign Up</button>
+        <div class="topbar-right">
+          <div class="topbar-actions">
+            <button class="nav-button primary" type="button">Sign Up</button>
+          </div>
+          <div class="topbar-menu">
+            <button class="ghost menu-trigger" type="button" aria-haspopup="menu" aria-expanded="false" aria-controls="topbar-menu">
+              Menu
+            </button>
+            <div class="menu-panel" id="topbar-menu" role="menu" aria-hidden="true">
+              <a class="menu-item" href="/docs" role="menuitem">Docs</a>
+              <button class="menu-item primary" type="button" role="menuitem">Sign Up</button>
+            </div>
+          </div>
+        </div>
       </div>
     </header>
 
@@ -32,7 +45,7 @@
       <section class="doc-section">
         <div class="doc-header">
           <p class="kicker">Endpoint</p>
-          <h2>https://quickurl/shorten/</h2>
+          <h2>https://quickurl.app/shorten/</h2>
         </div>
         <div class="doc-grid">
           <div class="doc-card doc-stack">
@@ -40,7 +53,7 @@
               <h3>Overview</h3>
               <p class="muted">Create a short code for a long URL. Send JSON with the URL and get back a short code and short URL.</p>
               <div class="doc-list">
-                <div><span class="label">Parameters</span> <span class="value"><span class="doc-inline-code">url</span> (string, required)</span></div>
+                <div><span class="label">Parameters</span> <span class="value"><span class="doc-inline-code">url</span> (string, required), <span class="doc-inline-code">custom_code</span> (string, optional)</span></div>
                 <div><span class="label">Response</span> <span class="value"><span class="doc-inline-code">short_code</span>, <span class="doc-inline-code">short_url</span></span></div>
               </div>
             </div>
@@ -48,23 +61,29 @@
               <h3>Endpoint URL</h3>
               <div class="result">
                 <span class="label">POST</span>
-                <div class="value">https://quickurl/shorten/</div>
+                <div class="value">https://quickurl.app/shorten/</div>
               </div>
             </div>
             <div class="doc-code">
               <div class="code-panel">
                 <div class="tab-bar" data-tabs="shorten">
-                  <div class="tabs">
-                    <button class="tab active" data-tab="javascript" type="button">JavaScript</button>
-                    <button class="tab" data-tab="python" type="button">Python</button>
-                    <button class="tab" data-tab="curl" type="button">cURL</button>
+                  <div class="tabs" role="tablist" aria-label="Shorten example language">
+                    <button class="tab active" data-tab="javascript" type="button" role="tab" aria-selected="true">JavaScript</button>
+                    <button class="tab" data-tab="python" type="button" role="tab" aria-selected="false">Python</button>
+                    <button class="tab" data-tab="curl" type="button" role="tab" aria-selected="false">cURL</button>
                   </div>
+                  <label class="sr-only" for="shorten-language">Language</label>
+                  <select class="code-select" id="shorten-language" data-select="shorten">
+                    <option value="javascript">JavaScript</option>
+                    <option value="python">Python</option>
+                    <option value="curl">cURL</option>
+                  </select>
                   <button class="copy-code" type="button" data-copy="shorten">Copy</button>
                 </div>
                 <pre class="code-block" data-panel="shorten" data-content="javascript"><code>fetch("/shorten", {
   method: "POST",
   headers: { "Content-Type": "application/json" },
-  body: JSON.stringify({ url: "https://example.com" })
+  body: JSON.stringify({ url: "https://example.com", custom_code: "myCode123" })
 })
   .then((res) => res.json())
   .then(console.log);</code></pre>
@@ -72,12 +91,12 @@
 
 response = requests.post(
     "http://localhost:5000/shorten",
-    json={"url": "https://example.com"},
+    json={"url": "https://example.com", "custom_code": "myCode123"},
 )
 print(response.json())</code></pre>
                 <pre class="code-block hidden" data-panel="shorten" data-content="curl"><code>curl -X POST http://localhost:5000/shorten \
   -H "Content-Type: application/json" \
-  -d '{"url":"https://example.com"}'</code></pre>
+  -d '{"url":"https://example.com","custom_code":"myCode123"}'</code></pre>
               </div>
             </div>
           </div>
@@ -87,7 +106,7 @@ print(response.json())</code></pre>
       <section class="doc-section">
         <div class="doc-header">
           <p class="kicker">Endpoint</p>
-          <h2>https://quickurl/resolve/&lt;code&gt;</h2>
+          <h2>https://quickurl.app/resolve/&lt;code&gt;</h2>
         </div>
         <div class="doc-grid">
           <div class="doc-card doc-stack">
@@ -103,17 +122,23 @@ print(response.json())</code></pre>
               <h3>Endpoint URL</h3>
               <div class="result">
                 <span class="label">GET</span>
-                <div class="value">https://quickurl/resolve/&lt;code&gt;</div>
+                <div class="value">https://quickurl.app/resolve/&lt;code&gt;</div>
               </div>
             </div>
             <div class="doc-code">
               <div class="code-panel">
                 <div class="tab-bar" data-tabs="resolve">
-                  <div class="tabs">
-                    <button class="tab active" data-tab="javascript" type="button">JavaScript</button>
-                    <button class="tab" data-tab="python" type="button">Python</button>
-                    <button class="tab" data-tab="curl" type="button">cURL</button>
+                  <div class="tabs" role="tablist" aria-label="Resolve example language">
+                    <button class="tab active" data-tab="javascript" type="button" role="tab" aria-selected="true">JavaScript</button>
+                    <button class="tab" data-tab="python" type="button" role="tab" aria-selected="false">Python</button>
+                    <button class="tab" data-tab="curl" type="button" role="tab" aria-selected="false">cURL</button>
                   </div>
+                  <label class="sr-only" for="resolve-language">Language</label>
+                  <select class="code-select" id="resolve-language" data-select="resolve">
+                    <option value="javascript">JavaScript</option>
+                    <option value="python">Python</option>
+                    <option value="curl">cURL</option>
+                  </select>
                   <button class="copy-code" type="button" data-copy="resolve">Copy</button>
                 </div>
                 <pre class="code-block" data-panel="resolve" data-content="javascript"><code>fetch("/resolve/g8")
@@ -132,26 +157,107 @@ print(response.json())</code></pre>
     </div>
 
     <script>
-      const tabGroups = document.querySelectorAll("[data-tabs]");
-      tabGroups.forEach((group) => {
+      const menu = document.querySelector(".topbar-menu");
+      const menuTrigger = document.querySelector(".menu-trigger");
+      if (menu && menuTrigger) {
+        const menuPanel = menu.querySelector(".menu-panel");
+        const menuItems = menuPanel
+          ? menuPanel.querySelectorAll("a, button, [role='menuitem']")
+          : [];
+
+        const setMenuOpen = (open) => {
+          menu.classList.toggle("open", open);
+          menuTrigger.setAttribute("aria-expanded", String(open));
+          if (menuPanel) {
+            menuPanel.setAttribute("aria-hidden", String(!open));
+          }
+          menuItems.forEach((item) => {
+            if (open) {
+              item.removeAttribute("tabindex");
+            } else {
+              item.setAttribute("tabindex", "-1");
+            }
+          });
+        };
+
+        const closeMenu = () => {
+          setMenuOpen(false);
+        };
+
+        menuTrigger.addEventListener("click", (event) => {
+          event.stopPropagation();
+          const isOpen = !menu.classList.contains("open");
+          setMenuOpen(isOpen);
+        });
+
+        document.addEventListener("click", (event) => {
+          if (!menu.contains(event.target)) {
+            closeMenu();
+          }
+        });
+
+        document.addEventListener("keydown", (event) => {
+          if (event.key === "Escape") {
+            closeMenu();
+            menuTrigger.focus();
+          }
+        });
+
+        setMenuOpen(menu.classList.contains("open"));
+      }
+
+      const setActivePanel = (panelName, tabValue) => {
+        document
+          .querySelectorAll(`[data-panel="${panelName}"]`)
+          .forEach((panel) => {
+            panel.classList.toggle("hidden", panel.dataset.content !== tabValue);
+          });
+
+        const group = document.querySelector(`[data-tabs="${panelName}"]`);
+        if (!group) return;
+        group.querySelectorAll(".tab").forEach((tab) => {
+          const isActive = tab.dataset.tab === tabValue;
+          tab.classList.toggle("active", isActive);
+          tab.setAttribute("aria-selected", String(isActive));
+        });
+
+        const select = group.querySelector(`[data-select="${panelName}"]`);
+        if (select && select.value !== tabValue) {
+          select.value = tabValue;
+        }
+      };
+
+      document.querySelectorAll("[data-tabs]").forEach((group) => {
         group.addEventListener("click", (event) => {
           const button = event.target.closest(".tab");
           if (!button) return;
           const panelName = group.dataset.tabs;
-          const tabValue = button.dataset.tab;
-          group.querySelectorAll(".tab").forEach((tab) => {
-            tab.classList.toggle("active", tab === button);
-          });
-          document
-            .querySelectorAll(`[data-panel="${panelName}"]`)
-            .forEach((panel) => {
-              panel.classList.toggle(
-                "hidden",
-                panel.dataset.content !== tabValue
-              );
-            });
+          setActivePanel(panelName, button.dataset.tab);
         });
       });
+
+      document.querySelectorAll("[data-select]").forEach((select) => {
+        select.addEventListener("change", (event) => {
+          const panelName = event.target.dataset.select;
+          setActivePanel(panelName, event.target.value);
+        });
+      });
+
+      const copyText = async (text) => {
+        if (navigator.clipboard && window.isSecureContext) {
+          await navigator.clipboard.writeText(text);
+          return;
+        }
+        const textarea = document.createElement("textarea");
+        textarea.value = text;
+        textarea.setAttribute("readonly", "");
+        textarea.style.position = "absolute";
+        textarea.style.left = "-9999px";
+        document.body.appendChild(textarea);
+        textarea.select();
+        document.execCommand("copy");
+        document.body.removeChild(textarea);
+      };
 
       document.querySelectorAll("[data-copy]").forEach((button) => {
         button.addEventListener("click", async () => {
@@ -163,7 +269,7 @@ print(response.json())</code></pre>
           const code = activePanel.textContent.trim();
           const original = button.textContent;
           try {
-            await navigator.clipboard.writeText(code);
+            await copyText(code);
             button.textContent = "Copied";
           } catch (err) {
             button.textContent = "Failed";

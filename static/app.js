@@ -4,12 +4,15 @@ const copyBtn = document.getElementById("copyBtn");
 const logoLink = document.querySelector(".logo");
 
 const longUrlInput = document.getElementById("longUrl");
+const customCodeInput = document.getElementById("customCode");
 const shortUrlValue = document.getElementById("shortUrlValue");
 
 const codeInput = document.getElementById("codeInput");
 const resolveValue = document.getElementById("resolveValue");
 
-const httpsUrlPattern = /^https:\/\/.+\.[A-Za-z]{2,}(?:[/?#].*)?$/;
+const httpsUrlPattern = /^https:\/\/[^/\s]+\.[A-Za-z]{2,}(?:[/?#].*)?$/;
+const customCodePattern = /^[0-9A-Za-z]{2,64}$/;
+const reservedCodes = new Set(["docs", "shorten", "resolve", "static"]);
 let isShortUrlReady = false;
 
 const setResult = (el, message, ok = true) => {
@@ -19,6 +22,7 @@ const setResult = (el, message, ok = true) => {
 
 shortenBtn.addEventListener("click", async () => {
   const url = longUrlInput.value.trim();
+  const customCode = customCodeInput ? customCodeInput.value.trim() : "";
   if (!url) {
     setResult(shortUrlValue, "Please enter a URL.", false);
     isShortUrlReady = false;
@@ -34,14 +38,35 @@ shortenBtn.addEventListener("click", async () => {
     return;
   }
 
+  if (customCode) {
+    if (reservedCodes.has(customCode.toLowerCase())) {
+      setResult(shortUrlValue, "That custom code is reserved.", false);
+      isShortUrlReady = false;
+      return;
+    }
+    if (!customCodePattern.test(customCode)) {
+      setResult(
+        shortUrlValue,
+        "Custom code must be 2-64 characters: letters and digits only.",
+        false
+      );
+      isShortUrlReady = false;
+      return;
+    }
+  }
+
   setResult(shortUrlValue, "Working...");
   isShortUrlReady = false;
 
   try {
+    const payload = { url };
+    if (customCode) {
+      payload.custom_code = customCode;
+    }
     const res = await fetch("/shorten", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ url }),
+      body: JSON.stringify(payload),
     });
 
     if (!res.ok) {
@@ -113,4 +138,53 @@ if (logoLink) {
       event.preventDefault();
     }
   });
+}
+
+const menu = document.querySelector(".topbar-menu");
+const menuTrigger = document.querySelector(".menu-trigger");
+if (menu && menuTrigger) {
+  const menuPanel = menu.querySelector(".menu-panel");
+  const menuItems = menuPanel
+    ? menuPanel.querySelectorAll("a, button, [role='menuitem']")
+    : [];
+
+  const setMenuOpen = (open) => {
+    menu.classList.toggle("open", open);
+    menuTrigger.setAttribute("aria-expanded", String(open));
+    if (menuPanel) {
+      menuPanel.setAttribute("aria-hidden", String(!open));
+    }
+    menuItems.forEach((item) => {
+      if (open) {
+        item.removeAttribute("tabindex");
+      } else {
+        item.setAttribute("tabindex", "-1");
+      }
+    });
+  };
+
+  const closeMenu = () => {
+    setMenuOpen(false);
+  };
+
+  menuTrigger.addEventListener("click", (event) => {
+    event.stopPropagation();
+    const isOpen = !menu.classList.contains("open");
+    setMenuOpen(isOpen);
+  });
+
+  document.addEventListener("click", (event) => {
+    if (!menu.contains(event.target)) {
+      closeMenu();
+    }
+  });
+
+  document.addEventListener("keydown", (event) => {
+    if (event.key === "Escape") {
+      closeMenu();
+      menuTrigger.focus();
+    }
+  });
+
+  setMenuOpen(menu.classList.contains("open"));
 }
