@@ -1,58 +1,67 @@
-# URL Shortener (Flask + MySQL)
+# QuickURL (Next.js + Firebase + Vercel)
 
-Simple URL shortener using a base62 counter with a small web UI.
+QuickURL is now a Next.js App Router service that preserves the original public API contracts while moving storage to Firestore and adding optional Firebase Auth ownership controls.
 
-## Requirements
-- Python 3.9+
-- MySQL
+## Preserved public endpoints
+- `POST /shorten`
+- `GET /resolve/:code`
+- `GET /:code` redirect behavior
 
-## Setup
+## Added authenticated endpoints
+- `GET /api/my-links`
+- `PATCH /api/my-links/:code`
+- `DELETE /api/my-links/:code`
+
+## Stack
+- Next.js (TypeScript, App Router)
+- Firebase Auth (Email/Password + Google)
+- Firestore (links + counter)
+- Vercel deployment target
+
+## Local setup
 ```powershell
-python -m venv .venv
-.\.venv\Scripts\Activate.ps1
-pip install -r requirements.txt
+npm install
+Copy-Item .env.local.example .env.local
+npm run dev
 ```
 
-## Configuration
-Set these environment variables as needed:
-- `MYSQL_HOST` (default: `localhost`)
-- `MYSQL_USER` (default: `root`)
-- `MYSQL_PASSWORD` (default: empty)
-- `MYSQL_DATABASE` (default: `url_shortener`)
-- `MYSQL_PORT` (default: `3306`)
-- `PORT` (default: `5000`)
-- `SHORTENER_COUNTER_START` (default: `1000`)
-- `CORS_ALLOWED_ORIGINS` (comma-separated; default: `*`)
+Open `http://localhost:3000`.
 
-Example (PowerShell):
-```powershell
-$env:MYSQL_HOST="localhost"
-$env:MYSQL_USER="root"
-$env:MYSQL_PASSWORD="your_password"
-$env:MYSQL_DATABASE="url_shortener"
-```
+## Environment
+- Placeholder keys: `.env.example`
+- Local placeholders: `.env.local.example`
+- Full key-by-key docs: `docs/ENVIRONMENT.md`
 
-## Run
-```powershell
-python main.py
-```
-
-The app will create the `quickurl` and `counter_state` tables if they don't exist.
-Open the UI at `http://localhost:5000/` (do not use `file://`).
-
-## API
-### POST /shorten
-Request JSON:
+## API examples
+### `POST /shorten`
+Request:
 ```json
-{"url": "https://example.com"}
+{"url":"https://example.com","custom_code":"myCode123"}
 ```
-Response JSON:
+Response:
 ```json
-{"short_code": "g8", "short_url": "http://localhost:5000/g8"}
+{"short_code":"myCode123","short_url":"http://localhost:3000/myCode123"}
 ```
 
-### GET /{code}
-Redirects to the original URL.
+### `GET /resolve/g8`
+Response:
+```json
+{"url":"https://example.com"}
+```
 
-### GET /resolve/{code}
-Returns JSON for the destination URL if the code exists.
+## Scripts
+- `npm run dev` - start Next.js dev server
+- `npm run build` - production build
+- `npm run start` - run production server
+- `npm run test` - unit + integration tests (Vitest)
+- `npm run test:e2e` - Playwright tests
+- `npm run migrate:mysql-to-firestore` - run migration
+- `npm run verify:migration` - validate migration
+
+## Migration docs
+- `docs/Migration-Runbook.md`
+
+## Additional docs
+- `docs/Design-Doc.md`
+- `docs/Developer-Guide.md`
+- `docs/Function-Reference.md`
