@@ -1,0 +1,44 @@
+{
+  "name": "quickurl-next-firebase",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:integration": "vitest run tests/integration",
+    "test:e2e": "playwright test",
+    "migrate:mysql-to-firestore": "tsx scripts/migrate-mysql-to-firestore.ts",
+    "verify:migration": "tsx scripts/verify-migration.ts",
+    "migrate:backfill-isdeleted": "tsx scripts/backfill-isDeleted.ts"
+  },
+  "dependencies": {
+    "clsx": "^2.1.1",
+    "firebase": "^11.10.0",
+    "firebase-admin": "^13.0.0",
+    "next": "^15.3.0",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "zod": "^3.24.2"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.52.0",
+    "@testing-library/jest-dom": "^6.6.3",
+    "@testing-library/react": "^16.2.0",
+    "@types/node": "^22.13.10",
+    "@types/react": "^19.0.12",
+    "@types/react-dom": "^19.0.4",
+    "@vitejs/plugin-react": "^4.3.4",
+    "autoprefixer": "^10.4.20",
+    "mysql2": "^3.12.0",
+    "postcss": "^8.5.3",
+    "tailwindcss": "^3.4.17",
+    "tsx": "^4.20.5",
+    "typescript": "^5.8.2",
+    "vitest": "^3.1.1"
+  }
+}
