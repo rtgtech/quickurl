@@ -31,6 +31,7 @@ Open `http://localhost:3000`.
 - Placeholder keys: `.env.example`
 - Local placeholders: `.env.local.example`
 - Full key-by-key docs: `docs/ENVIRONMENT.md`
+- Note: `NEXT_PUBLIC_*` values (including Firebase Web API key) are intentionally visible in browser code/devtools.
 
 ## API examples
 ### `POST /shorten`

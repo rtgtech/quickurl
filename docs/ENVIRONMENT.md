@@ -26,6 +26,12 @@ This project uses two placeholder files:
 | `MYSQL_DATABASE` | Required for migration scripts | Source database name | `url_shortener` | migration/verification scripts |
 | `MYSQL_PORT` | Optional | Source database port | `3306` | migration/verification scripts |
 
+## Public vs secret values
+- `NEXT_PUBLIC_*` variables are embedded into client bundles by Next.js and are visible in browser DevTools/Network. This is expected.
+- `NEXT_PUBLIC_FIREBASE_API_KEY` is a Firebase project identifier, not a private secret.
+- Treat these as secrets and keep them server-only: `FIREBASE_PRIVATE_KEY`, `FIREBASE_CLIENT_EMAIL`, database passwords, and any non-`NEXT_PUBLIC_*` credentials.
+- Never rename server-only secrets with a `NEXT_PUBLIC_` prefix.
+
 ## Production notes
 1. Vercel:
 - Add all `NEXT_PUBLIC_*` and server-side Firebase keys in the project Environment Variables.

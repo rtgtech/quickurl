@@ -53,6 +53,9 @@ npm run test:e2e
 4. Add or update Playwright coverage when behavior changes.
 
 ## Troubleshooting
+- Firebase API key visible in browser Network tab:
+  - Expected. `NEXT_PUBLIC_FIREBASE_API_KEY` is public by design for web clients.
+  - Verify no server credentials (`FIREBASE_PRIVATE_KEY`, `FIREBASE_CLIENT_EMAIL`, DB passwords) are exposed to client code or prefixed with `NEXT_PUBLIC_`.
 - `401 Authentication required`:
   - Confirm client is signed in and Authorization header includes Firebase ID token.
 - `403 Forbidden` on dashboard mutations:

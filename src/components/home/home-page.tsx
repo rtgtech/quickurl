@@ -25,7 +25,7 @@ export function HomePage() {
   const [resolveMessage, setResolveMessage] = useState("Paste a code above");
   const [resolveError, setResolveError] = useState(false);
 
-  const authButtonLabel = useMemo(() => (user ? "Dashboard" : "Sign Up"), [user]);
+  const authButtonLabel = useMemo(() => (user ? "Dashboard" : "Sign In"), [user]);
 
   const setShortResult = (message: string, ok = true) => {
     setShortUrlMessage(message);

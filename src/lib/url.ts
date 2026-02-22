@@ -7,13 +7,9 @@ export function normalizeUrl(raw: string): string {
     return trimmed;
   }
 
-  try {
-    const parsed = new URL(trimmed);
-    if (parsed.protocol) {
-      return trimmed;
-    }
-  } catch {
-    // Continue with scheme injection fallback.
+  // Only treat inputs with explicit web schemes as already normalized.
+  if (/^https?:\/\//i.test(trimmed)) {
+    return trimmed;
   }
 
   try {
