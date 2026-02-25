@@ -250,6 +250,13 @@ export function HomePage() {
                 title="Enter a valid URL like https://example.com"
                 value={longUrl}
                 onChange={(event) => setLongUrl(event.target.value)}
+                onKeyDown={(event) => {
+                  if (event.key === "Enter") {
+                    event.preventDefault();
+                    void onShorten();
+                  }
+                }}
+                aria-describedby="shortResult"
               />
             </label>
             <label className="field">
@@ -266,6 +273,13 @@ export function HomePage() {
                 title="2-64 characters, letters and digits only"
                 value={customCode}
                 onChange={(event) => setCustomCode(event.target.value)}
+                onKeyDown={(event) => {
+                  if (event.key === "Enter") {
+                    event.preventDefault();
+                    void onShorten();
+                  }
+                }}
+                aria-describedby="shortResult"
               />
             </label>
             <button id="shortenBtn" className="primary" type="button" onClick={onShorten}>
@@ -296,6 +310,13 @@ export function HomePage() {
                 autoComplete="off"
                 value={resolveCode}
                 onChange={(event) => setResolveCode(event.target.value)}
+                onKeyDown={(event) => {
+                  if (event.key === "Enter") {
+                    event.preventDefault();
+                    void onVisit();
+                  }
+                }}
+                aria-describedby="resolveResult"
               />
             </label>
             <button id="goBtn" className="secondary" type="button" onClick={onVisit}>

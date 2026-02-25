@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
@@ -27,6 +27,8 @@ export function AuthModal({ open, onClose, defaultMode = "signup" }: AuthModalPr
   const [dialogMessage, setDialogMessage] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const authEnabled = isFirebaseClientConfigured();
+  const emailInputRef = useRef<HTMLInputElement>(null);
+  const passwordInputRef = useRef<HTMLInputElement>(null);
 
   const title = useMemo(() => (mode === "signup" ? "Create account" : "Sign in"), [mode]);
 
@@ -36,7 +38,15 @@ export function AuthModal({ open, onClose, defaultMode = "signup" }: AuthModalPr
     }
 
     setMode(defaultMode);
-  }, [defaultMode, open]);
+
+    // Focus the first actionable field when the modal opens for keyboard users.
+    if (!user) {
+      window.setTimeout(() => {
+        emailInputRef.current?.focus();
+        emailInputRef.current?.select();
+      }, 0);
+    }
+  }, [defaultMode, open, user]);
 
   if (!open) {
     return null;
@@ -124,19 +134,36 @@ export function AuthModal({ open, onClose, defaultMode = "signup" }: AuthModalPr
             <label className="auth-row">
               <span>Email</span>
               <input
+                id="auth-email"
+                ref={emailInputRef}
                 type="email"
                 value={email}
                 onChange={(event) => setEmail(event.target.value)}
+                onKeyDown={(event) => {
+                  if (event.key === "Enter") {
+                    event.preventDefault();
+                    passwordInputRef.current?.focus();
+                  }
+                }}
                 placeholder="you@example.com"
                 autoComplete="email"
+                autoFocus
               />
             </label>
             <label className="auth-row">
               <span>Password</span>
               <input
+                id="auth-password"
+                ref={passwordInputRef}
                 type="password"
                 value={password}
                 onChange={(event) => setPassword(event.target.value)}
+                onKeyDown={(event) => {
+                  if (event.key === "Enter") {
+                    event.preventDefault();
+                    void submitEmail();
+                  }
+                }}
                 placeholder="At least 6 characters"
                 autoComplete={mode === "signup" ? "new-password" : "current-password"}
               />
