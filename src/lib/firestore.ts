@@ -50,6 +50,19 @@ function isExpiredAnonymousLink(data: RawLinkDocument, nowMs = Date.now()): bool
   return nowMs - createdAtMs > UNAUTHENTICATED_LINK_TTL_MS;
 }
 
+function canReclaimCustomCode(data: RawLinkDocument, nowMs = Date.now()): boolean {
+  const hasAuthenticatedOwner = Boolean(data.ownerUid);
+  const softDeleted = isSoftDeleted(data);
+
+  // Rule 2.1: authenticated-owned code can be reassigned only when soft-deleted.
+  if (hasAuthenticatedOwner) {
+    return softDeleted;
+  }
+
+  // Rule 2.2: unauthenticated code can be reassigned when expired.
+  return isExpiredAnonymousLink(data, nowMs);
+}
+
 async function allocateNextGeneratedCode(): Promise<string> {
   const db = getAdminDb();
   const counterRef = db.doc(COUNTER_DOC_PATH);
@@ -103,7 +116,17 @@ export async function createShortLink(input: CreateLinkInput): Promise<CreateLin
       const existing = await customRef.get();
       if (existing.exists) {
         const existingData = existing.data() as RawLinkDocument;
-        if (!isSoftDeleted(existingData) && (existingData.url ?? "") === input.url) {
+
+        if (canReclaimCustomCode(existingData)) {
+          await customRef.set({
+            url: input.url,
+            ownerUid: null,
+            isCustom: true,
+            isDeleted: false,
+            createdAt: Timestamp.now(),
+            updatedAt: Timestamp.now(),
+          });
+
           return {
             code: input.customCode,
             reusedExistingCode: true,

@@ -17,6 +17,7 @@ export function getBearerToken(request: Request): string | null {
 
 export async function getAuthenticatedRequestContext(
   request: Request,
+  options?: { checkRevoked?: boolean },
 ): Promise<AuthenticatedRequestContext | null> {
   const token = getBearerToken(request);
   if (!token) {
@@ -24,7 +25,7 @@ export async function getAuthenticatedRequestContext(
   }
 
   try {
-    const decoded = await getAdminAuth().verifyIdToken(token);
+    const decoded = await getAdminAuth().verifyIdToken(token, Boolean(options?.checkRevoked));
     return {
       uid: decoded.uid,
       email: decoded.email ?? null,

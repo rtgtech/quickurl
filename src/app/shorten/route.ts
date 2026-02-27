@@ -49,7 +49,7 @@ export async function POST(request: Request) {
     }
   }
 
-  const authContext = await getAuthenticatedRequestContext(request);
+  const authContext = await getAuthenticatedRequestContext(request, { checkRevoked: true });
 
   try {
     const result = await createShortLink({

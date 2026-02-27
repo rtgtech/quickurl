@@ -17,7 +17,7 @@ export async function PATCH(
   request: Request,
   { params }: { params: Promise<{ code: string }> },
 ) {
-  const auth = await getAuthenticatedRequestContext(request);
+  const auth = await getAuthenticatedRequestContext(request, { checkRevoked: true });
   if (!auth) {
     return jsonResponse(request, { error: "Authentication required" }, { status: 401 });
   }
@@ -55,7 +55,7 @@ export async function DELETE(
   request: Request,
   { params }: { params: Promise<{ code: string }> },
 ) {
-  const auth = await getAuthenticatedRequestContext(request);
+  const auth = await getAuthenticatedRequestContext(request, { checkRevoked: true });
   if (!auth) {
     return jsonResponse(request, { error: "Authentication required" }, { status: 401 });
   }
