@@ -2,8 +2,9 @@
 
 import { createContext, useContext, useEffect, useMemo, useState } from "react";
 import type { User } from "firebase/auth";
-import { onAuthStateChanged, signOut } from "firebase/auth";
+import { onIdTokenChanged, signOut } from "firebase/auth";
 import { getFirebaseClientAuth, isFirebaseClientConfigured } from "@/lib/firebase/client";
+import { AUTH_COOKIE_NAME } from "@/lib/auth-constants";
 
 interface AuthContextValue {
   user: User | null;
@@ -26,8 +27,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     try {
       const auth = getFirebaseClientAuth();
-      return onAuthStateChanged(auth, (nextUser) => {
+      return onIdTokenChanged(auth, async (nextUser) => {
         setUser(nextUser);
+        if (nextUser) {
+          const token = await nextUser.getIdToken();
+          document.cookie = `${AUTH_COOKIE_NAME}=${encodeURIComponent(token)}; path=/; SameSite=Lax; Secure`;
+        } else {
+          document.cookie = `${AUTH_COOKIE_NAME}=; path=/; Max-Age=0; SameSite=Lax; Secure`;
+        }
         setLoading(false);
       });
     } catch {

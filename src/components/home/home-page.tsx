@@ -1,10 +1,12 @@
 "use client";
 
 import Link from "next/link";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { AuthModal } from "@/components/home/auth-modal";
 import { TopBar } from "@/components/home/topbar";
 import { useAuth } from "@/components/home/auth-provider";
+import { sanitizeNextPath } from "@/lib/navigation";
 
 const HTTPS_URL_PATTERN = /^https:\/\/[^/\s]+\.[A-Za-z]{2,}(?:[/?#].*)?$/;
 const CUSTOM_CODE_PATTERN = /^[0-9A-Za-z]{2,64}$/;
@@ -12,8 +14,11 @@ const RESERVED_CODES = new Set(["docs", "shorten", "resolve", "static"]);
 
 export function HomePage() {
   const { user, signOutUser } = useAuth();
+  const router = useRouter();
+  const searchParams = useSearchParams();
   const [authOpen, setAuthOpen] = useState(false);
   const [authMode, setAuthMode] = useState<"signup" | "signin">("signup");
+  const handledNextPathRef = useRef<string | null>(null);
 
   const [longUrl, setLongUrl] = useState("");
   const [customCode, setCustomCode] = useState("");
@@ -25,7 +30,28 @@ export function HomePage() {
   const [resolveMessage, setResolveMessage] = useState("Paste a code above");
   const [resolveError, setResolveError] = useState(false);
 
+  const shouldAutoOpenSignIn = searchParams.get("auth") === "signin";
+  const nextPath = useMemo(() => sanitizeNextPath(searchParams.get("next")), [searchParams]);
   const authButtonLabel = useMemo(() => (user ? "Dashboard" : "Sign In"), [user]);
+
+  useEffect(() => {
+    if (shouldAutoOpenSignIn && !user) {
+      setAuthMode("signin");
+      setAuthOpen(true);
+    }
+  }, [shouldAutoOpenSignIn, user]);
+
+  useEffect(() => {
+    if (!user || !shouldAutoOpenSignIn || !nextPath) {
+      return;
+    }
+
+    if (handledNextPathRef.current === nextPath) {
+      return;
+    }
+    handledNextPathRef.current = nextPath;
+    router.replace(nextPath);
+  }, [nextPath, router, shouldAutoOpenSignIn, user]);
 
   const setShortResult = (message: string, ok = true) => {
     setShortUrlMessage(message);
@@ -112,14 +138,17 @@ export function HomePage() {
     setResolveResult("Checking...");
 
     try {
-      const response = await fetch(`/resolve/${encodeURIComponent(code)}`);
-      if (!response.ok) {
-        const body = (await response.json().catch(() => ({}))) as { error?: string };
+      const authToken = await user?.getIdToken();
+      const finalResponse = await fetch(`/resolve/${encodeURIComponent(code)}`, {
+        headers: authToken ? { Authorization: `Bearer ${authToken}` } : undefined,
+      });
+      if (!finalResponse.ok) {
+        const body = (await finalResponse.json().catch(() => ({}))) as { error?: string };
         setResolveResult(body.error ?? "Code not found", false);
         return;
       }
 
-      const body = (await response.json()) as { url: string };
+      const body = (await finalResponse.json()) as { url: string };
       setResolveResult(`Redirecting to ${body.url}`);
       window.location.href = `/${encodeURIComponent(code)}`;
     } catch {
@@ -332,7 +361,17 @@ export function HomePage() {
         </main>
       </div>
 
-      <AuthModal open={authOpen} onClose={() => setAuthOpen(false)} defaultMode={authMode} />
+      <AuthModal
+        open={authOpen}
+        onClose={() => setAuthOpen(false)}
+        defaultMode={authMode}
+        onAuthenticated={() => {
+          if (shouldAutoOpenSignIn && nextPath) {
+            handledNextPathRef.current = nextPath;
+            router.replace(nextPath);
+          }
+        }}
+      />
     </>
   );
 }

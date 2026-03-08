@@ -9,6 +9,7 @@ vi.mock("@/lib/firestore", () => ({
 }));
 
 import { POST } from "@/app/shorten/route";
+import { getAuthenticatedRequestContext } from "@/lib/auth";
 import { createShortLink } from "@/lib/firestore";
 
 describe("POST /shorten", () => {
@@ -28,7 +29,7 @@ describe("POST /shorten", () => {
     await expect(response.json()).resolves.toEqual({ error: "Missing 'url' in JSON body" });
   });
 
-  it("returns shortened payload", async () => {
+  it("returns shortened payload with default public access mode", async () => {
     const request = new Request("http://localhost:3000/shorten", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -45,6 +46,44 @@ describe("POST /shorten", () => {
     expect(createShortLink).toHaveBeenCalledWith({
       url: "https://example.com",
       ownerUid: null,
+      accessMode: "public",
+      allowedUserUids: [],
+      allowedEmails: [],
+      customCode: null,
+    });
+  });
+
+  it("rejects auth_required for anonymous request", async () => {
+    const request = new Request("http://localhost:3000/shorten", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ url: "https://example.com", access_mode: "auth_required" }),
+    });
+
+    const response = await POST(request);
+    expect(response.status).toBe(400);
+    await expect(response.json()).resolves.toEqual({
+      error: "Authentication is required to set access_mode='auth_required'",
+    });
+  });
+
+  it("accepts auth_required for authenticated request", async () => {
+    vi.mocked(getAuthenticatedRequestContext).mockResolvedValueOnce({ uid: "u1", email: "x@example.com" });
+
+    const request = new Request("http://localhost:3000/shorten", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ url: "https://example.com", access_mode: "auth_required" }),
+    });
+
+    const response = await POST(request);
+    expect(response.status).toBe(200);
+    expect(createShortLink).toHaveBeenCalledWith({
+      url: "https://example.com",
+      ownerUid: "u1",
+      accessMode: "auth_required",
+      allowedUserUids: ["u1"],
+      allowedEmails: ["x@example.com"],
       customCode: null,
     });
   });

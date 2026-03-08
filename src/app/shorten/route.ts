@@ -2,7 +2,8 @@ import { getAuthenticatedRequestContext } from "@/lib/auth";
 import { createShortLink } from "@/lib/firestore";
 import { jsonResponse, buildCorsHeaders } from "@/lib/http";
 import { normalizeUrl, validateTargetUrl } from "@/lib/url";
-import { validateCustomCode } from "@/lib/validators";
+import { validateAccessMode, validateCustomCode } from "@/lib/validators";
+import type { AccessMode } from "@/lib/types";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -19,6 +20,7 @@ export async function POST(request: Request) {
     url?: unknown;
     custom_code?: unknown;
     code?: unknown;
+    access_mode?: unknown;
   };
 
   const rawUrl = payload.url;
@@ -50,11 +52,36 @@ export async function POST(request: Request) {
   }
 
   const authContext = await getAuthenticatedRequestContext(request, { checkRevoked: true });
+  let accessMode: AccessMode = "public";
+  if (payload.access_mode !== undefined && payload.access_mode !== null) {
+    const parsedAccessMode = validateAccessMode(String(payload.access_mode));
+    if (!parsedAccessMode) {
+      return jsonResponse(request, { error: "Invalid 'access_mode'. Use 'public' or 'auth_required'" }, { status: 400 });
+    }
+
+    if (parsedAccessMode === "auth_required" && !authContext) {
+      return jsonResponse(
+        request,
+        { error: "Authentication is required to set access_mode='auth_required'" },
+        { status: 400 },
+      );
+    }
+
+    accessMode = parsedAccessMode;
+  }
 
   try {
+    const allowedUserUids =
+      accessMode === "auth_required" && authContext?.uid ? [authContext.uid] : [];
+    const allowedEmails =
+      accessMode === "auth_required" && authContext?.email ? [authContext.email] : [];
+
     const result = await createShortLink({
       url: normalizedUrl,
       ownerUid: authContext?.uid ?? null,
+      accessMode,
+      allowedUserUids,
+      allowedEmails,
       customCode,
     });
 

@@ -808,6 +808,12 @@ button:active {
   width: auto;
 }
 
+.access-controls {
+  display: inline-grid;
+  gap: 8px;
+  justify-items: start;
+}
+
 .auth-modal-backdrop {
   position: fixed;
   inset: 0;
@@ -1053,7 +1059,37 @@ button:active {
 
   .dashboard-table td {
     border-bottom: 0;
-    padding: 6px 0;
+    padding: 0;
+    display: grid;
+    gap: 6px;
+  }
+
+  .dashboard-table tr {
+    background: rgba(255, 255, 255, 0.56);
+    border: 1px solid rgba(17, 17, 17, 0.08);
+    border-radius: 14px;
+    padding: 12px;
+    margin-bottom: 10px;
+  }
+
+  .dashboard-table td::before {
+    content: attr(data-label);
+    text-transform: uppercase;
+    letter-spacing: 1.1px;
+    font-size: 10px;
+    color: var(--muted);
+  }
+
+  .dashboard-table td[data-label="Code"] strong {
+    font-size: 16px;
+  }
+
+  .dashboard-table td[data-label="Actions"] .inline-actions {
+    gap: 10px;
+  }
+
+  .dashboard-table td[data-label="Actions"] .inline-actions button {
+    min-width: 92px;
   }
 }
 

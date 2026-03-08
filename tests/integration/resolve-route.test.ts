@@ -5,8 +5,13 @@ vi.mock("@/lib/firestore", () => ({
   incrementOwnedLinkClickCount: vi.fn(async () => undefined),
 }));
 
+vi.mock("@/lib/auth", () => ({
+  getAuthenticatedRequestContext: vi.fn(async () => null),
+}));
+
 import { GET } from "@/app/resolve/[code]/route";
 import { getLinkByCode, incrementOwnedLinkClickCount } from "@/lib/firestore";
+import { getAuthenticatedRequestContext } from "@/lib/auth";
 
 describe("GET /resolve/:code", () => {
   beforeEach(() => {
@@ -22,11 +27,14 @@ describe("GET /resolve/:code", () => {
     expect(incrementOwnedLinkClickCount).not.toHaveBeenCalled();
   });
 
-  it("returns URL for existing code", async () => {
+  it("returns URL and increments for public existing code", async () => {
     vi.mocked(getLinkByCode).mockResolvedValueOnce({
       shortCode: "g8",
       url: "https://example.com",
       ownerUid: "u1",
+      accessMode: "public",
+      allowedUserUids: [],
+      allowedEmails: [],
       isCustom: false,
       isDeleted: false,
       clickCount: 0,
@@ -42,11 +50,14 @@ describe("GET /resolve/:code", () => {
     expect(incrementOwnedLinkClickCount).toHaveBeenCalledWith("g8");
   });
 
-  it("does not increment for unowned link", async () => {
+  it("does not increment for unowned public link", async () => {
     vi.mocked(getLinkByCode).mockResolvedValueOnce({
       shortCode: "g8",
       url: "https://example.com",
       ownerUid: null,
+      accessMode: "public",
+      allowedUserUids: [],
+      allowedEmails: [],
       isCustom: false,
       isDeleted: false,
       clickCount: 0,
@@ -62,22 +73,51 @@ describe("GET /resolve/:code", () => {
     expect(incrementOwnedLinkClickCount).not.toHaveBeenCalled();
   });
 
-  it("does not increment when URL validation fails", async () => {
+  it("returns 401 for protected link when unauthenticated", async () => {
     vi.mocked(getLinkByCode).mockResolvedValueOnce({
       shortCode: "g8",
-      url: "https://exa mple.com",
+      url: "https://example.com",
       ownerUid: "u1",
+      accessMode: "auth_required",
+      allowedUserUids: ["u1"],
+      allowedEmails: ["owner@example.com"],
       isCustom: false,
       isDeleted: false,
       clickCount: 0,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
     });
+    vi.mocked(getAuthenticatedRequestContext).mockResolvedValueOnce(null);
 
     const request = new Request("http://localhost:3000/resolve/g8");
     const response = await GET(request, { params: Promise.resolve({ code: "g8" }) });
 
-    expect(response.status).toBe(400);
+    expect(response.status).toBe(401);
+    await expect(response.json()).resolves.toEqual({ error: "Authentication required" });
+    expect(incrementOwnedLinkClickCount).not.toHaveBeenCalled();
+  });
+
+  it("returns 403 for protected link when non-owner", async () => {
+    vi.mocked(getLinkByCode).mockResolvedValueOnce({
+      shortCode: "g8",
+      url: "https://example.com",
+      ownerUid: "u1",
+      accessMode: "auth_required",
+      allowedUserUids: ["u1"],
+      allowedEmails: ["owner@example.com"],
+      isCustom: false,
+      isDeleted: false,
+      clickCount: 0,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    });
+    vi.mocked(getAuthenticatedRequestContext).mockResolvedValueOnce({ uid: "u2", email: "x@example.com" });
+
+    const request = new Request("http://localhost:3000/resolve/g8");
+    const response = await GET(request, { params: Promise.resolve({ code: "g8" }) });
+
+    expect(response.status).toBe(403);
+    await expect(response.json()).resolves.toEqual({ error: "Forbidden" });
     expect(incrementOwnedLinkClickCount).not.toHaveBeenCalled();
   });
 });

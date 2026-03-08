@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { CUSTOM_CODE_PATTERN, RESERVED_CODES } from "@/lib/constants";
+import type { AccessMode } from "@/lib/types";
 
 export const urlSchema = z.string().regex(/^https?:\/\//i);
 
@@ -21,6 +22,15 @@ export function validateCustomCode(rawCode: string): string | null {
 
   if (!CUSTOM_CODE_PATTERN.test(code)) {
     return "Custom code must be 2-64 characters: letters and digits only";
+  }
+
+  return null;
+}
+
+export function validateAccessMode(rawAccessMode: string): AccessMode | null {
+  const accessMode = rawAccessMode.trim().toLowerCase();
+  if (accessMode === "public" || accessMode === "auth_required") {
+    return accessMode;
   }
 
   return null;

@@ -7,11 +7,14 @@ import {
   UNAUTHENTICATED_LINK_TTL_MS,
 } from "@/lib/constants";
 import { getAdminDb } from "@/lib/firebase/admin";
-import type { LinkDocument, RawLinkDocument } from "@/lib/types";
+import type { AccessMode, LinkDocument, RawLinkDocument } from "@/lib/types";
 
 interface CreateLinkInput {
   url: string;
   ownerUid: string | null;
+  accessMode: AccessMode;
+  allowedUserUids: string[];
+  allowedEmails: string[];
   customCode?: string | null;
 }
 
@@ -34,10 +37,20 @@ function isAlreadyExistsError(error: unknown): boolean {
 }
 
 function mapLinkDocument(shortCode: string, data: RawLinkDocument): LinkDocument {
+  const allowedUserUids = Array.isArray(data.allowedUserUids)
+    ? data.allowedUserUids.filter((value): value is string => typeof value === "string")
+    : [];
+  const allowedEmails = Array.isArray(data.allowedEmails)
+    ? data.allowedEmails.filter((value): value is string => typeof value === "string")
+    : [];
+
   return {
     shortCode,
     url: data.url,
     ownerUid: data.ownerUid,
+    accessMode: data.accessMode ?? "public",
+    allowedUserUids,
+    allowedEmails,
     isCustom: Boolean(data.isCustom),
     isDeleted: Boolean(data.isDeleted),
     clickCount: normalizeClickCount(data.clickCount),
@@ -105,6 +118,9 @@ export async function createShortLink(input: CreateLinkInput): Promise<CreateLin
     const createPayload = {
       url: input.url,
       ownerUid: input.ownerUid,
+      accessMode: input.accessMode,
+      allowedUserUids: input.allowedUserUids,
+      allowedEmails: input.allowedEmails,
       isCustom: true,
       isDeleted: false,
       clickCount: 0,
@@ -131,6 +147,9 @@ export async function createShortLink(input: CreateLinkInput): Promise<CreateLin
           await customRef.set({
             url: input.url,
             ownerUid: null,
+            accessMode: "public",
+            allowedUserUids: [],
+            allowedEmails: [],
             isCustom: true,
             isDeleted: false,
             clickCount: 0,
@@ -158,6 +177,9 @@ export async function createShortLink(input: CreateLinkInput): Promise<CreateLin
       await docRef.create({
         url: input.url,
         ownerUid: input.ownerUid,
+        accessMode: input.accessMode,
+        allowedUserUids: input.allowedUserUids,
+        allowedEmails: input.allowedEmails,
         isCustom: false,
         isDeleted: false,
         clickCount: 0,
@@ -238,7 +260,10 @@ export async function incrementOwnedLinkClickCount(code: string): Promise<void> 
 export async function updateOwnedLink(input: {
   code: string;
   ownerUid: string;
-  url: string;
+  url?: string;
+  accessMode?: AccessMode;
+  allowedUserUids?: string[];
+  allowedEmails?: string[];
 }): Promise<"updated" | "not_found" | "forbidden"> {
   const db = getAdminDb();
   const ref = db.collection(LINKS_COLLECTION).doc(input.code);
@@ -255,10 +280,46 @@ export async function updateOwnedLink(input: {
     return "not_found";
   }
 
-  await ref.update({
-    url: input.url,
+  const updates: Record<string, unknown> = {
     updatedAt: Timestamp.now(),
-  });
+  };
+
+  if (input.url !== undefined) {
+    updates.url = input.url;
+  }
+
+  if (input.accessMode !== undefined) {
+    updates.accessMode = input.accessMode;
+  }
+
+  if (input.allowedUserUids !== undefined) {
+    updates.allowedUserUids = input.allowedUserUids;
+  }
+
+  if (input.allowedEmails !== undefined) {
+    updates.allowedEmails = input.allowedEmails;
+  }
+
+  // Preserve existing allowlist when toggling modes; only auto-seed owner when
+  // switching to auth_required and the stored allowlist is currently empty.
+  if (
+    input.accessMode === "auth_required" &&
+    input.allowedUserUids === undefined &&
+    input.allowedEmails === undefined
+  ) {
+    const existingAllowedUserUids = Array.isArray(data.allowedUserUids)
+      ? data.allowedUserUids.filter((value): value is string => typeof value === "string")
+      : [];
+    const existingAllowedEmails = Array.isArray(data.allowedEmails)
+      ? data.allowedEmails.filter((value): value is string => typeof value === "string")
+      : [];
+
+    if (existingAllowedUserUids.length === 0 && existingAllowedEmails.length === 0) {
+      updates.allowedUserUids = [input.ownerUid];
+    }
+  }
+
+  await ref.update(updates);
 
   return "updated";
 }

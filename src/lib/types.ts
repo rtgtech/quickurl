@@ -4,6 +4,7 @@ export interface ShortenRequest {
   url: string;
   custom_code?: string;
   code?: string;
+  access_mode?: AccessMode;
 }
 
 export interface ShortenResponse {
@@ -19,10 +20,15 @@ export interface ApiError {
   error: string;
 }
 
+export type AccessMode = "public" | "auth_required";
+
 export interface LinkDocument {
   shortCode: string;
   url: string;
   ownerUid: string | null;
+  accessMode: AccessMode;
+  allowedUserUids: string[];
+  allowedEmails: string[];
   isCustom: boolean;
   isDeleted: boolean;
   clickCount: number;
@@ -38,6 +44,9 @@ export interface AuthenticatedRequestContext {
 export interface RawLinkDocument {
   url: string;
   ownerUid: string | null;
+  accessMode?: AccessMode;
+  allowedUserUids?: string[];
+  allowedEmails?: string[];
   isCustom: boolean;
   isDeleted?: boolean;
   clickCount?: number;

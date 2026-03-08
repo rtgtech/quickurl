@@ -17,9 +17,15 @@ interface AuthModalProps {
   open: boolean;
   onClose: () => void;
   defaultMode?: "signup" | "signin";
+  onAuthenticated?: () => void;
 }
 
-export function AuthModal({ open, onClose, defaultMode = "signup" }: AuthModalProps) {
+export function AuthModal({
+  open,
+  onClose,
+  defaultMode = "signup",
+  onAuthenticated,
+}: AuthModalProps) {
   const { user } = useAuth();
   const [mode, setMode] = useState<"signup" | "signin">(defaultMode);
   const [email, setEmail] = useState("");
@@ -95,6 +101,7 @@ export function AuthModal({ open, onClose, defaultMode = "signup" }: AuthModalPr
       } else {
         await signInWithEmailAndPassword(auth, email.trim(), password);
       }
+      onAuthenticated?.();
       onClose();
     } catch (error) {
       showErrorDialog(getErrorMessage(error));
@@ -112,6 +119,7 @@ export function AuthModal({ open, onClose, defaultMode = "signup" }: AuthModalPr
     setBusy(true);
     try {
       await signInWithPopup(getFirebaseClientAuth(), getGoogleProvider());
+      onAuthenticated?.();
       onClose();
     } catch (error) {
       showErrorDialog(getErrorMessage(error));

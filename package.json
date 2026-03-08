@@ -15,7 +15,9 @@
     "migrate:mysql-to-firestore": "tsx scripts/migrate-mysql-to-firestore.ts",
     "verify:migration": "tsx scripts/verify-migration.ts",
     "migrate:backfill-isdeleted": "tsx scripts/backfill-isDeleted.ts",
-    "migrate:backfill-clickcount": "tsx scripts/backfill-clickCount.ts"
+    "migrate:backfill-clickcount": "tsx scripts/backfill-clickCount.ts",
+    "migrate:backfill-accessmode": "tsx scripts/backfill-accessMode.ts",
+    "migrate:backfill-allowlist": "tsx scripts/backfill-allowlist.ts"
   },
   "dependencies": {
     "clsx": "^2.1.1",
