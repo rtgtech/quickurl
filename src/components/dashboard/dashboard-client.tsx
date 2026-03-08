@@ -195,6 +195,7 @@ export function DashboardClient() {
                   <tr>
                     <th>Code</th>
                     <th>Destination</th>
+                    <th>Clicks</th>
                     <th>Created</th>
                     <th>Actions</th>
                   </tr>
@@ -258,6 +259,7 @@ function DashboardRow({
           aria-label={`URL for ${link.shortCode}`}
         />
       </td>
+      <td>{link.clickCount}</td>
       <td>{new Date(link.createdAt).toLocaleString()}</td>
       <td>
         <div className="inline-actions">

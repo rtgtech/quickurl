@@ -1,5 +1,5 @@
 ﻿import { NextResponse } from "next/server";
-import { getLinkByCode } from "@/lib/firestore";
+import { getLinkByCode, incrementOwnedLinkClickCount } from "@/lib/firestore";
 import { normalizeUrl, validateTargetUrl } from "@/lib/url";
 
 export const runtime = "nodejs";
@@ -82,6 +82,9 @@ export async function GET(
     );
   }
 
+  if (link.ownerUid) {
+    await incrementOwnedLinkClickCount(code);
+  }
   const response = NextResponse.redirect(target, 307);
   for (const [header, value] of Object.entries(NO_STORE_HEADERS)) {
     response.headers.set(header, value);

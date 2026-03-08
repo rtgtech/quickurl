@@ -20,6 +20,14 @@ interface CreateLinkResult {
   reusedExistingCode: boolean;
 }
 
+export function normalizeClickCount(value: unknown): number {
+  if (typeof value === "number" && Number.isFinite(value) && value >= 0) {
+    return Math.floor(value);
+  }
+
+  return 0;
+}
+
 function isAlreadyExistsError(error: unknown): boolean {
   const code = (error as { code?: unknown })?.code;
   return code === 6 || code === "6" || code === "already-exists";
@@ -32,6 +40,7 @@ function mapLinkDocument(shortCode: string, data: RawLinkDocument): LinkDocument
     ownerUid: data.ownerUid,
     isCustom: Boolean(data.isCustom),
     isDeleted: Boolean(data.isDeleted),
+    clickCount: normalizeClickCount(data.clickCount),
     createdAt: data.createdAt.toDate().toISOString(),
     updatedAt: data.updatedAt.toDate().toISOString(),
   };
@@ -98,6 +107,7 @@ export async function createShortLink(input: CreateLinkInput): Promise<CreateLin
       ownerUid: input.ownerUid,
       isCustom: true,
       isDeleted: false,
+      clickCount: 0,
       createdAt: Timestamp.now(),
       updatedAt: Timestamp.now(),
     };
@@ -123,6 +133,7 @@ export async function createShortLink(input: CreateLinkInput): Promise<CreateLin
             ownerUid: null,
             isCustom: true,
             isDeleted: false,
+            clickCount: 0,
             createdAt: Timestamp.now(),
             updatedAt: Timestamp.now(),
           });
@@ -149,6 +160,7 @@ export async function createShortLink(input: CreateLinkInput): Promise<CreateLin
         ownerUid: input.ownerUid,
         isCustom: false,
         isDeleted: false,
+        clickCount: 0,
         createdAt: Timestamp.now(),
         updatedAt: Timestamp.now(),
       });
@@ -196,6 +208,31 @@ export async function listLinksByOwner(ownerUid: string): Promise<LinkDocument[]
     .map((doc) => ({ id: doc.id, data: doc.data() as RawLinkDocument }))
     .filter((doc) => !isSoftDeleted(doc.data))
     .map((doc) => mapLinkDocument(doc.id, doc.data));
+}
+
+export async function incrementOwnedLinkClickCount(code: string): Promise<void> {
+  const db = getAdminDb();
+  const ref = db.collection(LINKS_COLLECTION).doc(code);
+
+  await db.runTransaction(async (tx) => {
+    const snap = await tx.get(ref);
+    if (!snap.exists) {
+      return;
+    }
+
+    const data = snap.data() as RawLinkDocument;
+    if (!data.ownerUid || isSoftDeleted(data)) {
+      return;
+    }
+
+    tx.set(
+      ref,
+      {
+        clickCount: FieldValue.increment(1),
+      },
+      { merge: true },
+    );
+  });
 }
 
 export async function updateOwnedLink(input: {

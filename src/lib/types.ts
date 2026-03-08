@@ -25,6 +25,7 @@ export interface LinkDocument {
   ownerUid: string | null;
   isCustom: boolean;
   isDeleted: boolean;
+  clickCount: number;
   createdAt: string;
   updatedAt: string;
 }
@@ -39,6 +40,7 @@ export interface RawLinkDocument {
   ownerUid: string | null;
   isCustom: boolean;
   isDeleted?: boolean;
+  clickCount?: number;
   createdAt: Timestamp;
   updatedAt: Timestamp;
 }

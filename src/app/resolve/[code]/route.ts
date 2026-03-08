@@ -1,4 +1,4 @@
-import { getLinkByCode } from "@/lib/firestore";
+import { getLinkByCode, incrementOwnedLinkClickCount } from "@/lib/firestore";
 import { jsonResponse, buildCorsHeaders } from "@/lib/http";
 import { normalizeUrl, validateTargetUrl } from "@/lib/url";
 
@@ -28,5 +28,8 @@ export async function GET(
     return jsonResponse(request, { error: "Invalid URL for this short code" }, { status: 400 });
   }
 
+  if (link.ownerUid) {
+    await incrementOwnedLinkClickCount(code);
+  }
   return jsonResponse(request, { url: target });
 }
